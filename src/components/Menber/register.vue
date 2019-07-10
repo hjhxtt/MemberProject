@@ -36,6 +36,20 @@ export default {
     identify,
   },
   mounted() {
+    if(Boolean(sessionStorage.getItem('mobile'))){
+      this.mobile=sessionStorage.getItem('mobile')
+    }
+    if(Boolean(sessionStorage.getItem('picCode'))){
+      this.picCode=sessionStorage.getItem('picCode')
+    }
+    if(Boolean(sessionStorage.getItem('verifyCode'))){
+      this.verifyCode=sessionStorage.getItem('verifyCode')
+    }
+    if(Boolean(sessionStorage.getItem('name'))){
+      this.name=sessionStorage.getItem('name')
+    }
+    
+
     this.getOpenId()
     this.getAppCardid()
   },
@@ -51,7 +65,6 @@ export default {
       openid:'',
       childPiccode:'',
       verifyCode:'',//短信验证码
-       
       name:'',
       canRegister:false,
       timestamp:'',
@@ -59,15 +72,25 @@ export default {
       jsticket:'',
     }
   },
+  beforeDestroy() {
+    sessionStorage.setItem('mobile',this.mobile)
+    sessionStorage.setItem('picCode',this.picCode)
+    sessionStorage.setItem('verifyCode',this.verifyCode)
+    sessionStorage.setItem('name',this.name)
+  },
   methods: {
     getAppCardid(){
       var paraObj = this.getPara()
       let code = paraObj['code']
       let state = paraObj['state'].split('#')[0]
       this.$store.state.state = state
+      localStorage.setItem('companyId',state)
       this.$request('iac-mms/wx/wxinfo','get',{},{companyId:state}).then(res=>{
           if(res.success){
             this.$store.state.appId = res.data.appId
+
+            // window.location.href = res.data.authUrl
+                          
           }
           
         })
@@ -107,7 +130,7 @@ export default {
           openId:this.openid
         }
         var $this = this
-        this.$request("iac-mms/wx/account/register",'post',menberData,{companyId:$this.$store.state.state}).then(function(data){
+        this.$request("iac-mms/wx/member/register",'post',menberData,{companyId:$this.$store.state.state}).then(function(data){
           if(data.success){
 
 
@@ -143,23 +166,27 @@ export default {
       let code = paraObj['code']
       let state = paraObj['state'].split('#')[0]
       this.$store.state.state = state
+      localStorage.setItem('companyId',state)
 
       //获取openid
       
       this.$request('iac-mms/wx/openid','get',{code:code},{companyId:state}).then(function(res){
         //console.log(res);
-        
-      //this.$request('iac-mms/wx/openid','get',{appid:state,code:code}).then(function(res){
-        this.openid =  res.data.openid  //todo 打开openid
-        this.getUserInfo()
-        localStorage.setItem('openid',this.openid)
+        if(res.success){
+          
+            this.openid =  res.data.openid  //todo 打开openid
+            localStorage.setItem('openid',this.openid)
+            this.getUserInfo()
+        }else{
+          this.$router.push('/error')
+        }
       }.bind(this))
 
     },
     //通过openid获取用户信息
     getUserInfo(){
       var $this = this
-      this.$request("iac-mms/wx/account",'get',{openId:this.openid},{companyId:$this.$store.state.state}).then(function(data){
+      this.$request("iac-mms/wx/member",'get',{openId:this.openid},{companyId:localStorage.getItem('companyId')}).then(function(data){
           if(data.data){//如果有数据则是会员
 
             this.$store.state.userInfo = data.data //已经是会员数据放入vuex

@@ -119,6 +119,22 @@ const router = new Router({
         title: "实体卡绑定"
       }
     },
+    {
+      path: '/code',
+      name: 'code',
+      component: () => import('@/components/Card/code'),
+      meta: {
+        title: "电子卡"
+      }
+    },
+    {
+      path: '/redirect',
+      name: 'redirect',
+      component: () => import('@/components/Menber/redirect'),
+      meta: {
+        title: ""
+      }
+    },
     
   ]
 
@@ -130,18 +146,38 @@ router.beforeEach((to, from, next) => {
   // from: Route: 当前导航正要离开的路由
   // next: Function: 一定要调用该方法来 resolve 这个钩子。执行效果依赖 next 方法的调用参数。
 
-  let isMenber = false; // true / false是否会员
+  // let isMenber = false; // true / false是否会员
 
-  if (to.name === 'register') {
-    console.log(isMenber);
-    if (isMenber) {
+  // if (to.name === 'register') {
+  //   console.log(isMenber);
+  //   if (isMenber) {
+  //     router.push({
+  //       name: 'isMenber'
+  //     });
+  //   }else{
+  //     next();
+  //   }
+  // }
+
+  let openId = false
+
+  if(Boolean(localStorage.getItem('openid')) && localStorage.getItem('openid') !== 'null'){
+    openId = true
+  }
+
+  if (to.name === 'register' || to.name === 'redirect' || to.name === 'home'){
+      next()
+  }else{
+    if (!openId) {
       router.push({
-        name: 'isMenber'
+        name: 'redirect'
       });
-    }else{
+    } else {
       next();
     }
   }
+
+  
 
   next();
 });

@@ -3,7 +3,7 @@
     <div class="charge_body">
       
       <div class="balance">
-        当前余额：<span>100元</span>
+        当前余额：<span>{{balance}}元</span>
       </div>
       <div class="recharge">
         <p>充值金额</p>
@@ -14,7 +14,7 @@
           @click="getItme(index);getVal(item)"
           >{{item}}元</li>
           <li @click="handleSelf" :class="flag?'active':''">自定义</li>
-          <li><input v-model="money" type="text" placeholder="金额" ref="money" @click="handleSelf">元</li>
+          <li><input v-model="money" type="number" placeholder="金额" ref="money" @click="handleSelf">元</li>
         </ul>
       </div>
       <el-button type="primary" @click="handelCharge">确认充值</el-button>
@@ -30,7 +30,11 @@ export default {
       activeClass:'-1',
       money:'',
       flag:false,
+      balance:0
     }
+  },
+  mounted() {
+    this.balance = localStorage.getItem('balance')
   },
   methods: {
         getItme(index) {

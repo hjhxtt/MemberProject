@@ -45,7 +45,7 @@ export default {
       this.$router.push('/myCard')
       return
     }
-    if(!Boolean(this.$store.state.state)){
+    if(!Boolean(localStorage.getItem('companyId'))){
       this.getCompanyId()
     }
     this.getticket()
@@ -71,11 +71,14 @@ export default {
       var paraObj = theRequest
       let code = paraObj['code']
       let state = paraObj['state'].split('#')[0]
+
       this.$store.state.state = state
+
+      localStorage.setItem('companyId',state)
     },
     getCardInfo(){
       this.state = this.$store.state.state
-      
+      this.state = localStorage.getItem('companyId')
       this.$request('iac-mms/wx/cardinfo','get',{},{companyId:this.state}).then(res=>{
           if(res.success){
             if(Boolean(res.data)){
@@ -98,7 +101,7 @@ export default {
     getticket(){
     let nonceStr = Math.floor(Math.random()*1000).toString()
     this.state = this.$store.state.state
-    
+    this.state = localStorage.getItem('companyId')
     //获取微信ticket
     this.$request('iac-mms/wx/jsticket','get',{},{companyId:this.state}).then(res=>{
 

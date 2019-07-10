@@ -1,6 +1,6 @@
 <template>
-  <div class="s-canvas">
-    <canvas id="s-canvas" :width="contentWidth" :height="contentHeight" @click="handleClick"></canvas>
+  <div class="s-canvas"  @click="handleClick">
+    <canvas id="s-canvas" :width="contentWidth" :height="contentHeight"></canvas>
   </div>
 </template>
 <script>
@@ -9,59 +9,42 @@ export default {
   data() {
     return {
       identifyCode:'',
-    }
-  },
-  props: {
-    fontSizeMin: {
-      type: Number,
-      default: 32
-    },
-    fontSizeMax: {
-      type: Number,
-      default: 40
-    },
-    backgroundColorMin: {
-      type: Number,
-      default: 180
-    },
-    backgroundColorMax: {
-      type: Number,
-      default: 240
-    },
-    colorMin: {
-      type: Number,
-      default: 50
-    },
-    colorMax: {
-      type: Number,
-      default: 160
-    },
-    lineColorMin: {
-      type: Number,
-      default: 40
-    },
-    lineColorMax: {
-      type: Number,
-      default: 180
-    },
-    dotColorMin: {
-      type: Number,
-      default: 0
-    },
-    dotColorMax: {
-      type: Number,
-      default: 255
-    },
-    contentWidth: {
-      type: Number,
-      default: 136
-    },
-    contentHeight: {
-      type: Number,
-      default: 48
+      contentWidth: 138,
+      contentHeight: 48,
+      fontSizeMin: 32,
+      fontSizeMax:40 ,
+      backgroundColorMin: 180,
+      backgroundColorMax: 240,
+      colorMin:50 ,
+      colorMax:160,
+      lineColorMin: 40,
+      lineColorMax:180 ,
+      dotColorMin: 0,
+      dotColorMax: 255,
     }
   },
   methods: {
+    checkMobile(){
+      var w = 136
+      var h = 48
+      var u = navigator.userAgent, app = navigator.appVersion;
+      
+      var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //g
+      var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      if (isAndroid) {
+        //这个是安卓操作系统
+        w = 68
+        h = 24
+      }
+      if (isIOS) {
+  　　　　//这个是ios操作系统
+        w = 136
+        h = 48
+      }
+      this.contentWidth = w
+       this.contentHeight = h
+       
+    },
     handleClick(){
         let num="";
         for(let i=0;i<4;i++){
@@ -83,6 +66,7 @@ export default {
       return 'rgb(' + r + ',' + g + ',' + b + ')'
     },
     drawPic() {
+      this.checkMobile()
       var canvas = document.getElementById('s-canvas')
       var ctx = canvas.getContext('2d')
       ctx.textBaseline = 'bottom'
@@ -98,6 +82,7 @@ export default {
       }
       this.drawLine(ctx)
       this.drawDot(ctx)
+      
     },
     drawText(ctx, txt, i) {
       ctx.fillStyle = this.randomColor(this.colorMin, this.colorMax)
@@ -155,8 +140,12 @@ export default {
     }
   },
   mounted() {
+    
     this.drawPic()
-    this.handleClick()
+    setTimeout(() => {
+      this.handleClick()
+    }, 100);
+    
   }
 }
 </script>

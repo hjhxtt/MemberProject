@@ -9,7 +9,7 @@
           等级：<span>{{userInfo.level}}</span>
         </div>
       </div>
-      <div class="card_detail">
+      <div class="card_detail" @click="toCode">
         <div class="card_user">
           <div class="user_pic">
             <img :src="cardInfo.logoUrl" alt="">
@@ -23,7 +23,7 @@
             </div>
           </div>
         </div>
-        <div class="cardId">{{cardInfo.wxCardNo}}</div>
+        <div class="cardId">{{userInfo.wxCardNo}}</div>
         <div class="user_card">
           <img :src="cardInfo.backgroundPicUrl" alt="">
         </div>
@@ -40,7 +40,7 @@
         </div>
         <div>
           <i>优惠券</i>
-          <router-link to="/coupon" tag="span">{{this.$store.state.couponNumber}}</router-link>
+          <span @click="toCoupon">{{couponNumber}}</span>
         </div>
       </div>
     </div>
@@ -56,14 +56,7 @@
 </template>
 <script>
 export default {
-  mounted(){
-
-    //this.openid  = localStorage.getItem('openid')
-    this.getUserInfo()
-    this.userInfo = this.$store.state.userInfo
-    this.getCardInfo()
-
-  },
+ 
   data() {
     return {
       userInfo:{
@@ -76,12 +69,37 @@ export default {
         },
         openid:'',
         cardInfo:{},
+        couponNumber:'',
     }
   },
+   mounted(){
+
+    //this.openid  = localStorage.getItem('openid')
+    this.getUserInfo()
+    this.userInfo = this.$store.state.userInfo
+    this.getCardInfo()
+  },
   methods:{
+    toCode(){
+      this.$router.push({
+        path:'/code',
+        query:{
+          id:this.userInfo.wxCardNo
+        }
+      })
+      
+    },
+    toCoupon(){
+      this.$router.push({
+        path:'/coupon',
+        query:{
+          id:this.userInfo.id
+        }
+      })
+    },
     getCardInfo(){
       
-      this.$request('iac-mms/wx/cardinfo','get',{},{companyId:this.$store.state.state}).then(res=>{
+      this.$request('iac-mms/wx/cardinfo','get',{},{companyId:localStorage.getItem('companyId')}).then(res=>{
           if(res.success){
             if(Boolean(res.data)){
               this.cardInfo = res.data
@@ -95,16 +113,24 @@ export default {
             
           }
       })
+
     },
     //通过openid获取用户信息
     getUserInfo(){
-      this.$request("iac-mms/wx/account",'get',{openId:localStorage.getItem('openid')},{companyId:this.$store.state.state}).then(function(data){
+      this.$request("iac-mms/wx/member",'get',{openId:localStorage.getItem('openid')},{companyId:localStorage.getItem('companyId')}).then(function(data){
           if(data.data){//如果有数据则是会员
-
+            console.log(data.data);
+            
             this.$store.state.userInfo = data.data //已经是会员数据放入vuex
-            //localStorage.setItem('userInfo',data.data)
-            this.userInfo = this.$store.state.userInfo
+            localStorage.setItem('balance',data.data.balance)
+            this.userInfo = data.data
+            debugger
             console.log(this.userInfo);
+            this.$request('iac-mms/wx/ticketrecord','get',{openId:localStorage.getItem('openid')},{companyId:localStorage.getItem('companyId')}).then(res=>{
+                if(res.success){
+                  this.couponNumber = res.data.length
+                }
+            })
             
           }else{
             return
